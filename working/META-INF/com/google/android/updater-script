@@ -1,5 +1,5 @@
 (!less_than_int(1403119661, getprop("ro.build.date.utc"))) || abort("Can't install this package (Wed Jun 18 19:27:41 UTC 2014) over newer build (" + getprop("ro.build.date") + ").");
-getprop("ro.product.device") == "flo" || abort("This package is for \"flo\" devices; this is a \"" + getprop("ro.product.device") + "\".");
+getprop("ro.product.device") == "deb" || abort("This package is for \"deb\" devices; this is a \"" + getprop("ro.product.device") + "\".");
 show_progress(0.500000, 0);
 unmount("/system");
 format("ext4", "EMMC", "/dev/block/platform/msm_sdcc.1/by-name/system", "0", "/system");
