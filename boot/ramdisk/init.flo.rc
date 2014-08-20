@@ -126,6 +126,10 @@ on boot
 # Increased technology maximums should be reflected here.
     write /proc/sys/net/core/rmem_max  1220608
     write /proc/sys/net/core/wmem_max  1220608
+    
+#Modify windows size to meet ATT requirement
+    setprop net.tcp.buffersize.hspa    4094,87380,704512,4096,16384,262144
+    setprop net.tcp.buffersize.lte     524288,1048576,2560000,262144,524288,1048576
 
 # msm specific files that need to be created on /data
 on post-fs-data
@@ -307,17 +311,11 @@ service bridgemgrd /system/bin/bridgemgrd
     user radio
     group radio
 
-service qcom-c_main-sh /system/bin/sh /init.qcom.class_main.sh
-    class main
-    user root
-    oneshot
-
 # QMUX must be in multiple groups to support external process connections
 service qmuxd /system/bin/qmuxd
     class main
     user radio
     group radio audio bluetooth gps net_bt_stack
-    disabled
 
 service ks_checker /system/bin/sh /system/etc/kickstart_checker.sh
     class core
@@ -337,7 +335,8 @@ service asus-dbug-d /data/data/com.asus.debugger/files/asus-debugger-d
 
 on property:gsm.radio.kickstart=on
     start kickstart
-
+    setprop gsm.radio.kickstart running
+    
 on property:gsm.radio.kickstart=off
     stop kickstart
 
@@ -347,9 +346,7 @@ on property:ril.asus_debugger_running=1
 service netmgrd /system/bin/netmgrd
     class main
     group radio
-    disabled
-
-
+ 
 service sensors /system/bin/sensors.qcom
     class late_start
     user root
@@ -427,6 +424,11 @@ service charger /charger
 service sdcard /system/bin/sdcard -u 1023 -g 1023 -l /data/media /mnt/shell/emulated
     class late_start
 
+# Binding fuse mount point to /storage/emulated/legacy
+on property:init.svc.sdcard=running
+    wait /mnt/shell/emulated/0
+    mount none /mnt/shell/emulated/0 /storage/emulated/legacy bind
+    
 service thermald /system/bin/thermald
     class main
     group radio system
@@ -448,8 +450,8 @@ service ppd /system/bin/mm-pp-daemon
     socket pps stream 0660 system system
     group system graphics
 
-service wcnss_init /system/bin/sh /system/etc/init.flo.wifi.sh
-    class main
+service conn_init /system/bin/conn_init
+    class late_start
     user system
     group system wifi
     seclabel u:r:conn_init:s0
@@ -478,16 +480,6 @@ service diag_mdlog /system/bin/diag_mdlog -s 100
     class late_start
     disabled
 
-# on property:gsm.sim.state=READY
-#    start diag_mdlog
-
-on property:ro.boot.baseband=mdm
-    start qmuxd
-    start netmgrd
-
-on property:ro.boot.baseband=apq
-    setprop ro.radio.noril yes
-    stop ril-daemon
 on property:init.svc.surfaceflinger=running
     start ppd
 
