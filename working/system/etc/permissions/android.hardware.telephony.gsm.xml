@@ -18,8 +18,4 @@
 <permissions>
     <feature name="android.hardware.telephony" />
     <feature name="android.hardware.telephony.gsm" />
-<<<<<<< HEAD
 </permissions>
-=======
-</permissions>
->>>>>>> cfeb90d1beffdbef91df666ebea70bd534d95522
